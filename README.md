@@ -109,16 +109,60 @@ O vetor de estado $\mathcal{S} \in \mathbb{R}^7$ garante rigorosamente a Proprie
 
 ---
 
-## 4. Entregas dos Desafios
+## 4. Desafio 2 — Solução via Deep Q-Network (DQN)
 
-Projeto desenvolvido ao longo de 6 desafios práticos na disciplina de Inteligência Artificial.
+Para resolver o MDP `RaceStrategy-v0` sem conhecimento explícito das equações diferenciais de desgaste e consumo, foi implementado um agente **Double Deep Q-Network (Double-DQN)** em PyTorch ([`src/agents/dqn_agent.py`](./src/agents/dqn_agent.py)) treinado e avaliado através do pipeline [`scripts/train_dqn.py`](./scripts/train_dqn.py).
 
-- **Desafio 1 (29/10/2026):** Definição do problema e modelagem formal do Processo de Decisão de Markov — Ambiente, Estado Markoviano, Espaço de Ações e Função de Recompensa (Apresentação disponível na pasta [`docs/`](./docs/)).
-- **Desafios 2 a 6:** *A serem definidos e adicionados conforme o andamento das aulas.*
+### 4.1. Arquitetura e Estabilidade Numérica
+
+1. **Aproximador Funcional (`QNetwork`):** Rede MLP com normalização de escala por dimensão de estado e arquitetura `Linear(7, 128) -> ReLU -> Linear(128, 128) -> ReLU -> Linear(128, 6)`.
+2. **Alvo Double-DQN e Atualização Polyak:** Desacopla a seleção da ação ótima $a^* = \arg\max_a Q_{\theta}(s_{t+1}, a)$ de sua avaliação $Q_{\theta^-}(s_{t+1}, a^*)$ na rede-alvo, atualizada suavemente a cada passo via *Polyak Averaging* ($\tau = 0.005$).
+3. **Huber Loss e *Gradient Clipping*:** Utiliza `nn.SmoothL1Loss()` combinada com corte de norma de gradiente (`max_norm = 1.0`) para evitar explosão de gradientes diante das recompensas terminais esparsas ($-100.0$ por DSQ da FIA e $-50.0$ por estouro de pneu).
+
+| Hiperparâmetro | Valor | Justificativa Técnica no Domínio `RaceStrategy-v0` |
+|:---|:---:|:---|
+| `gamma` ($\gamma$) | $0.99$ | Propaga o bônus/penalidade da Regra FIA na volta 50 até a janela de *pit stop* (voltas 20–36). |
+| `lr` ($\alpha$) | $10^{-3}$ | Taxa de aprendizado do otimizador Adam para convergência estável dos valores $Q(s,a)$. |
+| `batch_size` | $64$ | Amostragem uniforme sobre o `ReplayBuffer` vetorizado em NumPy ($50.000$ transições). |
+| `target_update_tau` ($\tau$) | $0.005$ | Atualização suave (*soft update*) contínua da *Target Network*. |
+| `epsilon` ($\epsilon$) | $1.0 \to 0.02$ | Decaimento linear em $1.400$ episódios (total de $2.000$ episódios de treino). |
 
 ---
 
-## 5. Referências Bibliográficas
+### 4.2. Resultados Comparativos (20 Seeds de Avaliação, $\epsilon = 0.0$)
+
+| Política Avaliada | Retorno Médio ($G_t$) | Tempo Total de Corrida ($\mathrm{s}$) | Nº de Pit Stops | Conformidade FIA ($\ge 2$ comp.) | Taxa de DNF |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| **Agente Aleatório (Random)** | $-588.14 \pm 96.78$ | $5108.14 \pm 96.78\;\mathrm{s}$ | $23.80$ | $100.0\%$ | $0.0\%$ |
+| **Heurística Especialista (1-Stop M$\to$H)** | $-127.96 \pm 0.99$ | $4647.96 \pm 0.99\;\mathrm{s}$ | $1.00$ | $100.0\%$ | $0.0\%$ |
+| **Agente DQN Treinado (2-Stop M$\to$S$\to$S)** | **$-57.40 \pm 0.87$** | **$4577.40 \pm 0.87\;\mathrm{s}$** | **$2.00$** | **$100.0\%$** | **$0.0\%$** |
+
+Na corrida de referência (`seed = 42`), o **Agente DQN Treinado** alcança retorno de **$-55.91$** (tempo total de **$4575.91\;\mathrm{s}$**), superando a **Heurística Especialista** (retorno de **$-127.34$**, tempo de **$4647.34\;\mathrm{s}$**) com uma economia líquida de **$71.43\;\mathrm{s}$**.
+
+---
+
+### 4.3. Curvas de Convergência e Telemetria da Estratégia Aprendida
+
+![Curvas de Treinamento e Convergência do DQN](docs/figures/dqn_training_curves.png)
+
+![Perfil de Telemetria da Estratégia Aprendida pelo DQN](docs/figures/dqn_race_telemetry_profile.png)
+
+- **Apresentação (Slides do Desafio 2):** [`docs/Desafio 2 - Resultados DQN (RaceStrategy-v0).pptx`](./docs/Desafio%202%20-%20Resultados%20DQN%20(RaceStrategy-v0).pptx)
+- **Relatório técnico e análise detalhada:** [`docs/desafio_02_resultados_dqn.md`](./docs/desafio_02_resultados_dqn.md)
+
+---
+
+## 5. Entregas dos Desafios
+
+Projeto desenvolvido ao longo de 6 desafios práticos na disciplina de Inteligência Artificial.
+
+- **Desafio 1 (29/10/2026):** Definição do problema e modelagem formal do Processo de Decisão de Markov — Ambiente, Estado Markoviano, Espaço de Ações e Função de Recompensa ([Slides PPTX](./docs/Desafio%201%20-%20RaceStrategy-v0%20(MDP).pptx) | [PDF](./docs/Desafio%201%20-%20RaceStrategy-v0%20(MDP).pdf)).
+- **Desafio 2 (07/11/2026):** Implementação do ambiente Gymnasium (`RaceStrategy-v0`), treinamento do agente **Deep Q-Network (DQN)** em PyTorch e análise gráfica comparativa de convergência e telemetria ([Slides PPTX](./docs/Desafio%202%20-%20Resultados%20DQN%20(RaceStrategy-v0).pptx) | [Relatório Técnico](./docs/desafio_02_resultados_dqn.md)).
+- **Desafios 3 a 6:** *A serem definidos e adicionados conforme o andamento das aulas.*
+
+---
+
+## 6. Referências Bibliográficas
 
 1. **Sutton, R. S., & Barto, A. G. (2018).** *Reinforcement Learning: An Introduction* (2nd ed.). MIT Press. — Fundamentação teórica de Processos de Decisão de Markov finitos (Cap. 3), Propriedade de Markov e formulação de funções de recompensa orientadas a objetivos.
 2. **Puterman, M. L. (2014).** *Markov Decision Processes: Discrete Stochastic Dynamic Programming*. John Wiley & Sons. — Formalização matemática de controle ótimo sequencial estocástico em horizonte finito.
