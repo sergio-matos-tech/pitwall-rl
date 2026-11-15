@@ -147,8 +147,9 @@ Na corrida de referência (`seed = 42`), o **Agente DQN Treinado** alcança reto
 
 ![Perfil de Telemetria da Estratégia Aprendida pelo DQN](docs/figures/dqn_race_telemetry_profile.png)
 
-- **Apresentação (Slides do Desafio 2):** [`docs/Desafio 2 - Resultados DQN (RaceStrategy-v0).pptx`](./docs/Desafio%202%20-%20Resultados%20DQN%20(RaceStrategy-v0).pptx)
-- **Relatório técnico e análise detalhada:** [`docs/desafio_02_resultados_dqn.md`](./docs/desafio_02_resultados_dqn.md)
+- **Convergência em 3 Estágios:** Eliminação de estouros de pneu (0% DNF até o ep. 350), fixação da regra obrigatória de compostos da FIA (100% de conformidade a partir do ep. 800) e estabilização em `-57.40` de retorno médio.
+- **Estratégia Descoberta (`2-Stop Medium -> Soft -> Soft`):** O agente descobriu autonomamente que realizar duas paradas para calçar pneus macios (`SOFT`, `-1.20 s/volta`) em ritmo de ataque (`PUSH`, `-0.90 s/volta`) supera a estratégia conservadora de parada única com pneu duro (`HARD`, `+1.00 s/volta`).
+- **Janelas de Box no *Tire Cliff*:** Na corrida de referência (`seed = 42`), o agente realiza paradas nas voltas **21** (`76.5%` de desgaste) e **36** (`87.5%` de desgaste), economizando **71.43 s** em relação à heurística especialista.
 
 ---
 
@@ -157,7 +158,7 @@ Na corrida de referência (`seed = 42`), o **Agente DQN Treinado** alcança reto
 Projeto desenvolvido ao longo de 6 desafios práticos na disciplina de Inteligência Artificial.
 
 - **Desafio 1 (29/10/2026):** Definição do problema e modelagem formal do Processo de Decisão de Markov — Ambiente, Estado Markoviano, Espaço de Ações e Função de Recompensa ([Slides PPTX](./docs/Desafio%201%20-%20RaceStrategy-v0%20(MDP).pptx) | [PDF](./docs/Desafio%201%20-%20RaceStrategy-v0%20(MDP).pdf)).
-- **Desafio 2 (07/11/2026):** Implementação do ambiente Gymnasium (`RaceStrategy-v0`), treinamento do agente **Deep Q-Network (DQN)** em PyTorch e análise gráfica comparativa de convergência e telemetria ([Slides PPTX](./docs/Desafio%202%20-%20Resultados%20DQN%20(RaceStrategy-v0).pptx) | [Relatório Técnico](./docs/desafio_02_resultados_dqn.md)).
+- **Desafio 2 (07/11/2026):** Implementação do ambiente Gymnasium (`RaceStrategy-v0`), treinamento do agente **Deep Q-Network (DQN)** em PyTorch e análise gráfica comparativa de convergência e telemetria ([Slides PPTX](./docs/Desafio%202%20-%20Resultados%20DQN%20(RaceStrategy-v0).pptx) | [PDF](./docs/Desafio%202%20-%20Resultados%20DQN%20(RaceStrategy-v0).pdf)).
 - **Desafios 3 a 6:** *A serem definidos e adicionados conforme o andamento das aulas.*
 
 ---

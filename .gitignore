@@ -76,4 +76,4 @@ logs/
 
 # Local backup vault
 .local_vault/
-/docs/desafio_01_slides.md
+/docs/*.md
