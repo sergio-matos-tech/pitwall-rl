@@ -127,6 +127,8 @@ Para resolver o MDP `RaceStrategy-v0` sem conhecimento explícito das equações
 | `target_update_tau` ($\tau$) | $0.005$ | Atualização suave (*soft update*) contínua da *Target Network*. |
 | `epsilon` ($\epsilon$) | $1.0 \to 0.02$ | Decaimento linear em $1.400$ episódios (total de $2.000$ episódios de treino). |
 
+- **Tempo de Execução do Pipeline (CPU):** Executado em CPU (`PyTorch 2.15.0+cpu`), o treinamento completo de $2.000$ episódios em [`scripts/train_dqn.py`](./scripts/train_dqn.py) — incluindo `warmup_steps = 640`, $2$ atualizações de gradiente por volta e avaliações determinísticas em $20$ seeds a cada $25$ episódios a partir do episódio $400$ — leva cerca de **4 minutos**: **`242.57 s`** para treino e avaliação (`240.7 s` no loop de episódios; `115.3 s` até o episódio $1.000$) e **`1.33 s`** para geração das figuras em $300\;\mathrm{DPI}$, totalizando **`243.90 s`**.
+
 ---
 
 ### 4.2. Resultados Comparativos (20 Seeds de Avaliação, $\epsilon = 0.0$)
